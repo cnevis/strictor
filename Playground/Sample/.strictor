@@ -1,0 +1,158 @@
+/* Naming */
+type
+{
+	name: PascalCase Meta_PascalCase;
+}
+
+function
+{
+	name: camelCase;
+	banned-suffixes: Of For At From To In On With By When;
+	banned-prefixes: with try;
+	banned-parts: remember Ui Host Role root mount remount smoke kind everything Helper Util Wrapper heal;
+}
+
+variable[storage=local]
+{
+	name: camelCase;
+	rename: index=idx raw=ptr colour=color centre=center initialise=initialize;
+}
+
+variable[storage=local][const=constexpr]
+{
+	name: camelCase UPPER_SNAKE;
+}
+
+variable[storage=parameter]
+{
+	name: camelCase;
+	banned-prefixes: out;
+	rename: index=idx raw=ptr;
+}
+
+variable[storage=template]
+{
+	name: PascalCase UPPER_SNAKE;
+}
+
+variable[storage=member][access=private]
+{
+	name: m_PascalCase;
+}
+
+variable[storage=member][access=protected]
+{
+	name: m_PascalCase;
+}
+
+variable[storage=member][access=public]
+{
+	name: PascalCase;
+}
+
+variable[storage=member][const=constexpr]
+{
+	name: UPPER_SNAKE;
+}
+
+variable[storage=global]
+{
+	name: g_PascalCase;
+}
+
+variable[storage=global][const=constexpr]
+{
+	name: UPPER_SNAKE g_PascalCase;
+}
+
+variable[storage=global][const=const]
+{
+	name: UPPER_SNAKE g_PascalCase;
+}
+
+enumerator
+{
+	name: PascalCase;
+}
+
+macro
+{
+	name: UPPER_SNAKE;
+}
+
+namespace
+{
+	name: snake_case;
+}
+
+*
+{
+	banned-parts: Ui Host Role root mount remount smoke kind everything Helper Util Wrapper heal;
+}
+
+/* Layout */
+control
+{
+	blank-before: 1;
+	blank-after: 1;
+}
+
+control[braced=no]
+{
+	blank-after: 0;
+}
+
+control > condition
+{
+	max-clauses: 4;
+}
+
+expression
+{
+	logical-operators: words;
+}
+
+/* Free functions: only static and impl helpers, operators, customization points and math */
+function[scope=free][linkage=external]
+{
+	helper: report;
+}
+
+namespace[name=impl] function[scope=free]
+{
+	helper: allow;
+}
+
+function[scope=free]
+{
+	helper-folders: Math Numeric;
+	helper-allow: main wmain WinMain wWinMain string parse format min max clamp abs lerp smoothStep pow;
+}
+
+/* Declarations, cases, enums and plurals */
+variable
+{
+	declarators: split;
+}
+
+case
+{
+	braces: insert;
+	blank-before: 1;
+}
+
+type
+{
+	plural: report;
+	plural-allow: Options Canvas Atlas Alias Bias Series;
+}
+
+type[storage=template]
+{
+	plural: allow;
+}
+
+type[enum=plain]
+{
+	report: use enum class;
+}
