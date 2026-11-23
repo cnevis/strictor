@@ -58,5 +58,5 @@ public:
 	std::vector<Rule> const& rules() const;
 
 private:
-	std::vector<Rule> parsed;
+	std::vector<Rule> list;
 };

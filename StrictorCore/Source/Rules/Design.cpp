@@ -4,7 +4,7 @@
 
 #include <format>
 
-static bool excused(FreeFunction const& f, Properties const& props)
+static bool exempt(FreeFunction const& f, Properties const& props)
 {
 	Properties::const_iterator allow = props.find("helper-allow");
 
@@ -44,7 +44,12 @@ void checkHelper(FreeFunction const& f, Properties const& props, std::vector<Dia
 {
 	Properties::const_iterator helper = props.find("helper");
 
-	if (helper == props.end() or helper->second[0] != "report" or excused(f, props))
+	if (helper == props.end() or helper->second[0] != "report")
+	{
+		return;
+	}
+
+	if (exempt(f, props))
 	{
 		return;
 	}

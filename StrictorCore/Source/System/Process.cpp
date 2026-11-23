@@ -167,13 +167,13 @@ ProcessResult runProcess(std::filesystem::path const& exe,
 
 	PROCESS_INFORMATION pi = {};
 	wchar_t const* cwd = dir.empty() ? nullptr : dir.c_str();
-	BOOL started = CreateProcessW(nullptr, cmd.data(), nullptr, nullptr, TRUE, CREATE_NO_WINDOW, nullptr, cwd, &si, &pi);
+	BOOL ok = CreateProcessW(nullptr, cmd.data(), nullptr, nullptr, TRUE, CREATE_NO_WINDOW, nullptr, cwd, &si, &pi);
 
 	inRead.close();
 	outWrite.close();
 	errWrite.close();
 
-	if (not started)
+	if (not ok)
 	{
 		throw std::runtime_error("cannot start " + utf8(exe));
 	}

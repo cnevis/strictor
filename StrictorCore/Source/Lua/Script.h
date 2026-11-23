@@ -17,7 +17,7 @@ public:
 	RuleContext(SourceText const& src, std::vector<Diagnostic>* diagnostics, std::vector<Edit>* edits);
 
 	void report(std::string const& rule, SyntaxNode const& node, std::string const& msg);
-	void insertBefore(SyntaxNode const& node, std::string const& text);
+	void prepend(SyntaxNode const& node, std::string const& text);
 	SourceText const& source() const;
 
 private:

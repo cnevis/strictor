@@ -30,10 +30,10 @@ static std::string readFile(std::filesystem::path const& p)
 
 static void writeFile(std::filesystem::path const& p, std::string const& text)
 {
-	std::ofstream out(p, std::ios::binary | std::ios::trunc);
-	out.write(text.data(), (std::streamsize)text.size());
+	std::ofstream file(p, std::ios::binary | std::ios::trunc);
+	file.write(text.data(), (std::streamsize)text.size());
 
-	if (not out)
+	if (not file)
 	{
 		throw std::runtime_error("cannot write the file");
 	}
@@ -129,11 +129,11 @@ int Runner::exitCode() const
 	return code;
 }
 
-void Runner::report(std::filesystem::path const& file, std::vector<Diagnostic> const& ds, std::FILE* out)
+void Runner::report(std::filesystem::path const& file, std::vector<Diagnostic> const& ds, std::FILE* fp)
 {
 	for (Diagnostic const& d : ds)
 	{
-		std::println(out, "{}:{}:{}: {}: {}", utf8(file), d.line, d.column, d.rule, d.message);
+		std::println(fp, "{}:{}:{}: {}: {}", utf8(file), d.line, d.column, d.rule, d.message);
 	}
 
 	if (not ds.empty())

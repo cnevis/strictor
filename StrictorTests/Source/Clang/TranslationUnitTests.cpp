@@ -19,7 +19,7 @@ static SyntaxTree parse(TempDir const& tmp, std::string const& code)
 	return tu.tree();
 }
 
-static std::vector<SyntaxNode const*> named(SyntaxTree const& tree)
+static std::vector<SyntaxNode const*> names(SyntaxTree const& tree)
 {
 	std::vector<SyntaxNode const*> result;
 
@@ -60,6 +60,33 @@ static SyntaxNode const* find(std::vector<SyntaxNode const*> const& ss, std::str
 	}
 
 	return nullptr;
+}
+
+static std::vector<std::string> types(SyntaxNode const* n)
+{
+	std::vector<std::string> result;
+
+	for (SyntaxNode const* c : n->children)
+	{
+		result.push_back(c->node.type);
+	}
+
+	return result;
+}
+
+static std::vector<SyntaxNode const*> all(SyntaxTree const& tree, std::string const& type)
+{
+	std::vector<SyntaxNode const*> result;
+
+	for (std::unique_ptr<SyntaxNode> const& n : tree.nodes())
+	{
+		if (n->node.type == type)
+		{
+			result.push_back(n.get());
+		}
+	}
+
+	return result;
 }
 
 using Attributes = std::map<std::string, std::string>;
@@ -142,7 +169,7 @@ TEST_CASE("TranslationUnit collects declarations with their node type and attrib
 {
 	TempDir tmp;
 	SyntaxTree tree = parse(tmp, g_Code);
-	std::vector<SyntaxNode const*> ss = named(tree);
+	std::vector<SyntaxNode const*> ss = names(tree);
 
 	struct Expected
 	{
@@ -217,7 +244,7 @@ TEST_CASE("TranslationUnit leaves out declarations from other files and builtins
 	tmp.write("lib.h", "#define LIB_MACRO 1\nint libFunction();\nstruct LibType {};\n");
 
 	SyntaxTree tree = parse(tmp, "#include \"lib.h\"\nint mine() { return libFunction() + LIB_MACRO; }\n");
-	std::vector<SyntaxNode const*> ss = named(tree);
+	std::vector<SyntaxNode const*> ss = names(tree);
 
 	REQUIRE(ss.size() == 1);
 	CHECK(ss[0]->name == "mine");
@@ -237,8 +264,8 @@ TEST_CASE("TranslationUnit parses a header once when a forced include already pu
 	TranslationUnit guard(tmp.path() / "guard.h", "#ifndef GUARD_H\n#define GUARD_H\nstruct Guarded {};\n#endif\n", cmd);
 	SyntaxTree onceTree = once.tree();
 	SyntaxTree guardTree = guard.tree();
-	std::vector<SyntaxNode const*> a = named(onceTree);
-	std::vector<SyntaxNode const*> b = named(guardTree);
+	std::vector<SyntaxNode const*> a = names(onceTree);
+	std::vector<SyntaxNode const*> b = names(guardTree);
 
 	CHECK(count(a, "Edited") == 1);
 	CHECK(count(a, "ONCE_MACRO") == 1);
@@ -259,8 +286,8 @@ TEST_CASE("TranslationUnit fails with the location of the first error")
 
 	SyntaxTree tree = parse(tmp, "#include \"bad.h\"\nint mine() { return 0; }\n");
 
-	CHECK(count(named(tree), "mine") == 1);
-	CHECK(count(named(tree), "alsoBroken") == 0);
+	CHECK(count(names(tree), "mine") == 1);
+	CHECK(count(names(tree), "alsoBroken") == 0);
 
 	CHECK_THROWS_WITH(parse(tmp, "#include \"bad.h\"\nint mine() { return nope; }\n"),
 	                  "parse failed at 2:21: use of undeclared identifier 'nope'");
@@ -272,33 +299,6 @@ TEST_CASE("TranslationUnit fails with the location of the first error")
 	                  Catch::Matchers::ContainsSubstring("lost.h:1:10: 'gone.h' file not found"));
 
 	CHECK_NOTHROW(parse(tmp, "int unused() { int x; return 0; }\n"));
-}
-
-static std::vector<std::string> types(SyntaxNode const* n)
-{
-	std::vector<std::string> result;
-
-	for (SyntaxNode const* c : n->children)
-	{
-		result.push_back(c->node.type);
-	}
-
-	return result;
-}
-
-static std::vector<SyntaxNode const*> all(SyntaxTree const& tree, std::string const& type)
-{
-	std::vector<SyntaxNode const*> result;
-
-	for (std::unique_ptr<SyntaxNode> const& n : tree.nodes())
-	{
-		if (n->node.type == type)
-		{
-			result.push_back(n.get());
-		}
-	}
-
-	return result;
 }
 
 static char const g_Statements[] =
@@ -513,7 +513,7 @@ TEST_CASE("TranslationUnit enters macro namespaces and sees what macro arguments
 {
 	TempDir tmp;
 	SyntaxTree tree = parse(tmp, g_Macros);
-	std::vector<SyntaxNode const*> ss = named(tree);
+	std::vector<SyntaxNode const*> ss = names(tree);
 
 	CHECK(count(ss, "lua_State") == 0);
 	CHECK(count(ss, "Later") == 1);

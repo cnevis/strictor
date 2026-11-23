@@ -35,8 +35,8 @@ std::filesystem::path TempDir::write(std::string const& name, std::string const&
 	std::filesystem::path p = dir / utf8Path(name);
 	std::filesystem::create_directories(p.parent_path());
 
-	std::ofstream out(p, std::ios::binary | std::ios::trunc);
-	out.write(text.data(), (std::streamsize)text.size());
+	std::ofstream file(p, std::ios::binary | std::ios::trunc);
+	file.write(text.data(), (std::streamsize)text.size());
 
 	return p;
 }

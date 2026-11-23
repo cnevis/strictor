@@ -207,7 +207,9 @@ TEST_CASE("strictor prints usage and exits 2 for a malformed command line")
 {
 	TempDir tmp;
 
-	for (std::vector<std::string> const& args : std::vector<std::vector<std::string>>{{}, {"frob"}, {"file"}, {"stdin"}, {"file", "-x", "a.cpp"}})
+	std::vector<std::vector<std::string>> cases = {{}, {"frob"}, {"file"}, {"stdin"}, {"file", "-x", "a.cpp"}};
+
+	for (std::vector<std::string> const& args : cases)
 	{
 		ProcessResult r = run(tmp, args);
 

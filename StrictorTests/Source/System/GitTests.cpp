@@ -75,6 +75,7 @@ TEST_CASE("gitChangedFiles lists modified, staged, untracked and renamed files r
 			"deep.h",
 			"untracked/inner.cpp"
 		};
+
 		CHECK(generic(gitChangedFiles()) == fromSub);
 	}
 }

@@ -33,6 +33,43 @@ static std::string spaceAfterNot(std::string const& text, std::string const& spe
 	return src.apply(edits);
 }
 
+static std::string split(std::string const& text, std::vector<std::string> const& names, std::vector<Diagnostic>* diagnostics)
+{
+	SourceText src(text);
+	std::vector<Declarator> group;
+	std::vector<Edit> edits;
+	std::size_t start = text.find_first_not_of(" \t");
+	std::size_t from = start;
+
+	for (std::string const& name : names)
+	{
+		std::size_t at = text.find(name, from);
+		std::size_t end = text.find_first_of(",;", at);
+		std::size_t brace = text.find('{', at);
+
+		if (brace < end)
+		{
+			end = text.find('}', brace) + 1;
+		}
+
+		group.push_back({start, at, end, 1, (int)start + 1});
+		from = end;
+	}
+
+	splitDeclarators(src, group, &edits, diagnostics);
+
+	return src.apply(edits);
+}
+
+static std::string brace(std::string const& text, std::vector<CaseBody> const& bodies)
+{
+	SourceText src(text);
+	std::vector<Edit> edits;
+	braceCases(src, bodies, &edits);
+
+	return src.apply(edits);
+}
+
 TEST_CASE("SourceText knows lines, blank lines and line endings")
 {
 	SourceText src("a\n\n  \t\nb\nc");
@@ -118,43 +155,6 @@ TEST_CASE("convertOperator switches between symbols and words, and spaceNot keep
 	CHECK(spaceAfterNot("not (a)", "not") == "not (a)");
 	CHECK(spaceAfterNot("not\n(a)", "not") == "not\n(a)");
 	CHECK(spaceAfterNot("!(a)", "!") == "!(a)");
-}
-
-static std::string split(std::string const& text, std::vector<std::string> const& names, std::vector<Diagnostic>* diagnostics)
-{
-	SourceText src(text);
-	std::vector<Declarator> group;
-	std::vector<Edit> edits;
-	std::size_t start = text.find_first_not_of(" \t");
-	std::size_t from = start;
-
-	for (std::string const& name : names)
-	{
-		std::size_t at = text.find(name, from);
-		std::size_t end = text.find_first_of(",;", at);
-		std::size_t brace = text.find('{', at);
-
-		if (brace < end)
-		{
-			end = text.find('}', brace) + 1;
-		}
-
-		group.push_back({start, at, end, 1, (int)start + 1});
-		from = end;
-	}
-
-	splitDeclarators(src, group, &edits, diagnostics);
-
-	return src.apply(edits);
-}
-
-static std::string brace(std::string const& text, std::vector<CaseBody> const& bodies)
-{
-	SourceText src(text);
-	std::vector<Edit> edits;
-	braceCases(src, bodies, &edits);
-
-	return src.apply(edits);
 }
 
 TEST_CASE("splitDeclarators gives every declarator its own declaration")

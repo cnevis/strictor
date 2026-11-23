@@ -22,6 +22,7 @@ std::string ClangFormat::format(std::filesystem::path const& file,
 	{
 		args.push_back(std::format("--lines={}:{}", first, last));
 	}
+
 	ProcessResult r = runProcess(exe, args, text, {});
 
 	if (r.exitCode != 0)

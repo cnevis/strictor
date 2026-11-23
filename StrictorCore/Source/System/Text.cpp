@@ -98,8 +98,9 @@ bool glob(std::string const& pattern, std::string const& s)
 	{
 		if (p < pattern.size() and pattern[p] == '*')
 		{
-			star = p++;
+			star = p;
 			resume = i;
+			p++;
 			continue;
 		}
 
@@ -115,8 +116,9 @@ bool glob(std::string const& pattern, std::string const& s)
 			return false;
 		}
 
+		resume++;
 		p = star + 1;
-		i = ++resume;
+		i = resume;
 	}
 
 	while (p < pattern.size() and pattern[p] == '*')

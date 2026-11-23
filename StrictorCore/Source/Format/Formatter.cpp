@@ -57,7 +57,7 @@ static bool switchBlock(SyntaxNode const& n)
 	return it != n.parent->node.attributes.end() and it->second == "switch";
 }
 
-static std::string joined(std::vector<std::string> const& words)
+static std::string join(std::vector<std::string> const& words)
 {
 	std::string result;
 
@@ -82,6 +82,8 @@ Formatter::Formatter(Toolchain const& tc, std::filesystem::path const& buildDir)
 {
 }
 
+Formatter::~Formatter() = default;
+
 bool Formatter::supports(std::filesystem::path const& file) const
 {
 	std::filesystem::path ext = file.extension();
@@ -96,8 +98,6 @@ bool Formatter::supports(std::filesystem::path const& file) const
 
 	return false;
 }
-
-Formatter::~Formatter() = default;
 
 FormatResult Formatter::format(std::filesystem::path const& file,
                               std::string const& text,
@@ -129,6 +129,7 @@ FormatResult Formatter::format(std::filesystem::path const& file,
 		SyntaxTree tree = tu.tree();
 		SourceText src(r.text);
 		std::vector<Edit> edits;
+
 		r.diagnostics.clear();
 		late.clear();
 		check(abs, tree, *cascade, src, &edits, &late, &r.diagnostics);
@@ -264,7 +265,7 @@ void Formatter::check(std::filesystem::path const& file,
 
 		if (props.count("report") and (n->name.empty() or n->checkName))
 		{
-			diagnostics->push_back({n->line, n->column, "report", joined(props["report"])});
+			diagnostics->push_back({n->line, n->column, "report", join(props["report"])});
 		}
 
 		if (n->node.type == "condition" and props.count("max-clauses"))
@@ -298,8 +299,13 @@ void Formatter::check(std::filesystem::path const& file,
 			continue;
 		}
 
-		bool local = n->parent and n->parent->node.type == "statement";
-		std::pair<SyntaxNode const*, std::size_t> key = local ? std::make_pair(n->parent, (std::size_t)0) : std::make_pair((SyntaxNode const*)nullptr, n->start);
+		std::pair<SyntaxNode const*, std::size_t> key = {nullptr, n->start};
+
+		if (n->parent and n->parent->node.type == "statement")
+		{
+			key = {n->parent, 0};
+		}
+
 		groups[key].push_back(n.get());
 	}
 

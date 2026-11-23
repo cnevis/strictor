@@ -5,6 +5,11 @@
 
 #include <string>
 
+static Node const g_Local = {"variable", {{"storage", "local"}, {"const", "none"}}};
+static Node const g_Parameter = {"variable", {{"storage", "parameter"}, {"const", "none"}}};
+static Node const g_PrivateMember = {"variable", {{"storage", "member"}, {"access", "private"}, {"const", "none"}}};
+static Node const g_Function = {"function", {}};
+
 static Cascade cascade(std::vector<std::string> const& sheets)
 {
 	TempDir tmp;
@@ -13,16 +18,12 @@ static Cascade cascade(std::vector<std::string> const& sheets)
 
 	for (std::string const& text : sheets)
 	{
-		c.append(Stylesheet(tmp.write(std::to_string(i++) + "/.strictor", text)));
+		c.append(Stylesheet(tmp.write(std::to_string(i) + "/.strictor", text)));
+		i++;
 	}
 
 	return c;
 }
-
-static Node const g_Local = {"variable", {{"storage", "local"}, {"const", "none"}}};
-static Node const g_Parameter = {"variable", {{"storage", "parameter"}, {"const", "none"}}};
-static Node const g_PrivateMember = {"variable", {{"storage", "member"}, {"access", "private"}, {"const", "none"}}};
-static Node const g_Function = {"function", {}};
 
 TEST_CASE("Cascade lets the more specific selector win regardless of order")
 {

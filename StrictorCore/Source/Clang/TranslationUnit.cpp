@@ -154,7 +154,7 @@ static char const* constness(CXTranslationUnit unit, CXCursor c, std::string con
 {
 	CXToken* tokens = nullptr;
 	unsigned n = 0;
-	bool constexprFound = false;
+	char const* result = clang_isConstQualifiedType(clang_getCursorType(c)) ? "const" : "none";
 	clang_tokenize(unit, clang_getCursorExtent(c), &tokens, &n);
 
 	for (unsigned i = 0; i < n; i++)
@@ -168,27 +168,17 @@ static char const* constness(CXTranslationUnit unit, CXCursor c, std::string con
 
 		if (spelling == "constexpr" or spelling == "constinit")
 		{
-			constexprFound = true;
+			result = "constexpr";
 			break;
 		}
 	}
 
 	clang_disposeTokens(unit, tokens, n);
 
-	if (constexprFound)
-	{
-		return "constexpr";
-	}
-
-	if (clang_isConstQualifiedType(clang_getCursorType(c)))
-	{
-		return "const";
-	}
-
-	return "none";
+	return result;
 }
 
-static bool skipped(CXCursor c, std::string const& name)
+static bool exempt(CXCursor c, std::string const& name)
 {
 	if (name.empty() or name.starts_with("operator"))
 	{
@@ -230,7 +220,7 @@ static std::vector<CXCursor> kids(CXCursor c)
 	std::vector<CXCursor> result;
 	clang_visitChildren(c, [](CXCursor k, CXCursor, CXClientData data)
 	{
-		((std::vector<CXCursor>*)data)->push_back(k);
+		static_cast<std::vector<CXCursor>*>(data)->push_back(k);
 		return CXChildVisit_Continue;
 	}, &result);
 
@@ -559,7 +549,7 @@ private:
 				n = add(n, "statement", c);
 			}
 
-			if (logical(c) and spelledHere(c))
+			if (logical(c) and inPrimary(c))
 			{
 				n = add(n, "expression", c);
 				operatorToken(c, n);
@@ -690,6 +680,7 @@ private:
 	SyntaxNode* declaration(SyntaxNode* owner, CXCursor c, char const* type)
 	{
 		SyntaxNode* n = add(owner, type, c);
+		CXCursorKind k = clang_getCursorKind(c);
 		unsigned line = 0;
 		unsigned column = 0;
 		clang_getExpansionLocation(clang_getCursorLocation(c), nullptr, &line, &column, nullptr);
@@ -698,15 +689,15 @@ private:
 		n->node.name = n->name;
 		n->line = (int)line;
 		n->column = (int)column;
-		n->checkName = not special(clang_getCursorKind(c)) and not skipped(c, n->name);
+		n->checkName = not special(k) and not exempt(c, n->name);
 		n->nameOffset = offset(clang_getCursorLocation(c));
 
-		if (clang_getCursorKind(c) == CXCursor_TemplateTypeParameter or clang_getCursorKind(c) == CXCursor_TemplateTemplateParameter)
+		if (k == CXCursor_TemplateTypeParameter or k == CXCursor_TemplateTemplateParameter)
 		{
 			n->node.attributes["storage"] = "template";
 		}
 
-		if (clang_getCursorKind(c) == CXCursor_EnumDecl)
+		if (k == CXCursor_EnumDecl)
 		{
 			n->node.attributes["enum"] = clang_EnumDecl_isScoped(c) ? "class" : "plain";
 		}
@@ -758,7 +749,6 @@ private:
 		}
 	}
 
-
 	SyntaxNode* add(SyntaxNode* owner, char const* type, CXCursor c)
 	{
 		SyntaxNode* n = tree->add(owner, type);
@@ -787,10 +777,8 @@ private:
 		}
 
 		CXSourceLocation loc = clang_getRangeStart(clang_getCursorExtent(c));
-		unsigned spelling = 0;
-		clang_getSpellingLocation(loc, nullptr, nullptr, nullptr, &spelling);
 
-		return offset(loc) != spelling;
+		return offset(loc) != spelling(loc);
 	}
 
 	std::vector<Token> tokens(CXCursor c) const
@@ -824,7 +812,7 @@ private:
 		return not ts.empty() and ts.back().spelling == "}";
 	}
 
-	bool spelledHere(CXCursor c) const
+	bool inPrimary(CXCursor c) const
 	{
 		CXFile where = nullptr;
 		clang_getSpellingLocation(clang_getRangeStart(clang_getCursorExtent(c)), &where, nullptr, nullptr, nullptr);
@@ -834,8 +822,8 @@ private:
 
 	void operatorToken(CXCursor c, SyntaxNode* n) const
 	{
-		bool spelled = macro(c);
-		std::size_t low = spelled ? spelling(clang_getRangeStart(clang_getCursorExtent(c))) : 0;
+		bool inMacro = macro(c);
+		std::size_t low = inMacro ? spelling(clang_getRangeStart(clang_getCursorExtent(c))) : 0;
 
 		if (clang_getCursorKind(c) == CXCursor_BinaryOperator)
 		{
@@ -844,7 +832,7 @@ private:
 			if (not ks.empty())
 			{
 				CXSourceLocation end = clang_getRangeEnd(clang_getCursorExtent(ks[0]));
-				low = spelled ? spelling(end) : offset(end);
+				low = inMacro ? spelling(end) : offset(end);
 			}
 		}
 
@@ -927,7 +915,7 @@ private:
 			high = semicolons[1];
 		}
 
-		int found = -1;
+		int result = -1;
 
 		for (std::size_t i = 0; i < ks.size(); i++)
 		{
@@ -935,11 +923,11 @@ private:
 
 			if (offset(clang_getRangeStart(r)) > low and offset(clang_getRangeEnd(r)) <= high)
 			{
-				found = (int)i;
+				result = (int)i;
 			}
 		}
 
-		return found;
+		return result;
 	}
 
 	CXTranslationUnit unit;

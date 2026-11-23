@@ -2,6 +2,13 @@
 
 #include <cstdint>
 
+enum class Move : std::uint8_t
+{
+	MATCH,
+	REMOVE,
+	INSERT
+};
+
 static std::vector<std::string> split(std::string const& text)
 {
 	std::vector<std::string> result;
@@ -45,7 +52,9 @@ LineDelta::LineDelta(std::string const& base, std::string const& text)
 		head++;
 	}
 
-	while (tail < a.size() - head and tail < b.size() - head and a[a.size() - 1 - tail] == b[b.size() - 1 - tail])
+	while (tail < a.size() - head
+	       and tail < b.size() - head
+	       and a[a.size() - 1 - tail] == b[b.size() - 1 - tail])
 	{
 		lines[b.size() - 1 - tail] = false;
 		tail++;
@@ -59,7 +68,7 @@ LineDelta::LineDelta(std::string const& base, std::string const& text)
 		return;
 	}
 
-	std::vector<std::uint8_t> moves(n * m);
+	std::vector<Move> moves(n * m);
 	std::vector<int> prev(m + 1, 0);
 	std::vector<int> cur(m + 1, 0);
 
@@ -70,17 +79,17 @@ LineDelta::LineDelta(std::string const& base, std::string const& text)
 			if (a[head + i] == b[head + j])
 			{
 				cur[j + 1] = prev[j] + 1;
-				moves[i * m + j] = 0;
+				moves[i * m + j] = Move::MATCH;
 			}
 			else if (prev[j + 1] >= cur[j])
 			{
 				cur[j + 1] = prev[j + 1];
-				moves[i * m + j] = 1;
+				moves[i * m + j] = Move::REMOVE;
 			}
 			else
 			{
 				cur[j + 1] = cur[j];
-				moves[i * m + j] = 2;
+				moves[i * m + j] = Move::INSERT;
 			}
 		}
 
@@ -92,21 +101,27 @@ LineDelta::LineDelta(std::string const& base, std::string const& text)
 
 	while (i > 0 and j > 0)
 	{
-		std::uint8_t move = moves[(i - 1) * m + (j - 1)];
+		switch (moves[(i - 1) * m + (j - 1)])
+		{
+			case Move::MATCH:
+			{
+				lines[head + j - 1] = false;
+				i--;
+				j--;
+				break;
+			}
 
-		if (move == 0)
-		{
-			lines[head + j - 1] = false;
-			i--;
-			j--;
-		}
-		else if (move == 1)
-		{
-			i--;
-		}
-		else
-		{
-			j--;
+			case Move::REMOVE:
+			{
+				i--;
+				break;
+			}
+
+			case Move::INSERT:
+			{
+				j--;
+				break;
+			}
 		}
 	}
 }

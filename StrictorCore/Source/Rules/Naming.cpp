@@ -57,9 +57,9 @@ static bool same(std::string const& a, std::string const& b)
 	return lowercase(a) == lowercase(b);
 }
 
-static std::string matchCase(std::string const& to, std::string const& word)
+static std::string matchCase(std::string const& text, std::string const& word)
 {
-	std::string s = to;
+	std::string s = text;
 
 	if (word.size() > 1 and uppercase(word) == word)
 	{
@@ -83,11 +83,6 @@ static std::vector<std::string> const& values(Properties const& props, char cons
 	Properties::const_iterator it = props.find(key);
 
 	return it == props.end() ? none : it->second;
-}
-
-static void add(std::vector<Diagnostic>* result, Identifier const& id, char const* rule, std::string const& msg)
-{
-	result->push_back({id.line, id.column, rule, msg});
 }
 
 static bool plural(std::string const& word, std::vector<std::string> const& allow)
@@ -182,7 +177,7 @@ void checkNaming(Identifier const& id, Properties const& props, std::vector<Diag
 
 		if (not fits)
 		{
-			add(result, id, "naming.case", std::format("{} '{}' should be {}", id.label, id.name, choices));
+			result->push_back({id.line, id.column, "naming.case", std::format("{} '{}' should be {}", id.label, id.name, choices)});
 		}
 
 		core = id.name.substr(prefix.size());
@@ -192,7 +187,7 @@ void checkNaming(Identifier const& id, Properties const& props, std::vector<Diag
 	{
 		if (id.name == b)
 		{
-			add(result, id, "naming.banned", std::format("{} '{}' is a banned name", id.label, id.name));
+			result->push_back({id.line, id.column, "naming.banned", std::format("{} '{}' is a banned name", id.label, id.name)});
 		}
 	}
 
@@ -211,7 +206,7 @@ void checkNaming(Identifier const& id, Properties const& props, std::vector<Diag
 		{
 			if (same(part, b))
 			{
-				add(result, id, "naming.banned", std::format("{} '{}' contains banned part '{}'", id.label, id.name, b));
+				result->push_back({id.line, id.column, "naming.banned", std::format("{} '{}' contains banned part '{}'", id.label, id.name, b)});
 			}
 		}
 	}
@@ -223,7 +218,7 @@ void checkNaming(Identifier const& id, Properties const& props, std::vector<Diag
 	{
 		if (same(first, b))
 		{
-			add(result, id, "naming.prefix", std::format("{} '{}' starts with banned prefix '{}'", id.label, id.name, b));
+			result->push_back({id.line, id.column, "naming.prefix", std::format("{} '{}' starts with banned prefix '{}'", id.label, id.name, b)});
 		}
 	}
 
@@ -231,15 +226,15 @@ void checkNaming(Identifier const& id, Properties const& props, std::vector<Diag
 	{
 		if (same(last, b))
 		{
-			add(result, id, "naming.suffix", std::format("{} '{}' ends with banned suffix '{}'", id.label, id.name, b));
+			result->push_back({id.line, id.column, "naming.suffix", std::format("{} '{}' ends with banned suffix '{}'", id.label, id.name, b)});
 		}
 	}
 
-	std::vector<std::string> const& count = values(props, "plural");
+	std::vector<std::string> const& pluralMode = values(props, "plural");
 
-	if (not count.empty() and count[0] == "report" and plural(last, values(props, "plural-allow")))
+	if (not pluralMode.empty() and pluralMode[0] == "report" and plural(last, values(props, "plural-allow")))
 	{
-		add(result, id, "naming.plural", std::format("{} '{}' should be singular", id.label, id.name));
+		result->push_back({id.line, id.column, "naming.plural", std::format("{} '{}' should be singular", id.label, id.name)});
 	}
 
 	std::vector<std::string> const& pairs = values(props, "rename");
@@ -253,6 +248,6 @@ void checkNaming(Identifier const& id, Properties const& props, std::vector<Diag
 
 	if (suggestion != core)
 	{
-		add(result, id, "naming.rename", std::format("{} '{}' should be '{}'", id.label, id.name, prefix + suggestion));
+		result->push_back({id.line, id.column, "naming.rename", std::format("{} '{}' should be '{}'", id.label, id.name, prefix + suggestion)});
 	}
 }

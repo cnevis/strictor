@@ -54,6 +54,47 @@ static bool number(std::string const& s, int least)
 	return std::stoi(s) >= least;
 }
 
+static bool matchPart(Selector const& s, std::size_t part, Node const* node)
+{
+	if (not s.parts[part].matches(*node))
+	{
+		return false;
+	}
+
+	if (part == 0)
+	{
+		return true;
+	}
+
+	if (s.combinators[part - 1] == Combinator::CHILD)
+	{
+		return node->parent and matchPart(s, part - 1, node->parent);
+	}
+
+	for (Node const* a = node->parent; a; a = a->parent)
+	{
+		if (matchPart(s, part - 1, a))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool validNodeType(std::string const& type)
+{
+	for (std::string const& t : g_Types)
+	{
+		if (t == type and t != "*")
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 class StyleParser
 {
 public:
@@ -163,7 +204,7 @@ private:
 			s.type = word();
 		}
 
-		if (not known(g_Types, s.type))
+		if (not contains(g_Types, s.type))
 		{
 			fail("unknown selector '" + s.type + "'");
 		}
@@ -194,7 +235,7 @@ private:
 				fail("unknown attribute '" + c.attribute + "'");
 			}
 
-			if (not known(it->second, c.value))
+			if (not contains(it->second, c.value))
 			{
 				fail("unknown value '" + c.value + "' for attribute '" + c.attribute + "'");
 			}
@@ -210,7 +251,7 @@ private:
 		Declaration d;
 		d.property = word();
 
-		if (not known(g_Properties, d.property))
+		if (not contains(g_Properties, d.property))
 		{
 			fail("unknown property '" + d.property + "'");
 		}
@@ -380,7 +421,7 @@ private:
 	{
 		std::size_t start = pos;
 
-		while (pos < text.size() and (wordChar(text[pos]) or text[pos] == '*' or text[pos] == '~'))
+		while (pos < text.size() and patternChar(text[pos]))
 		{
 			pos++;
 		}
@@ -397,7 +438,7 @@ private:
 	{
 		std::size_t start = pos;
 
-		while (pos < text.size() and not space(text[pos]) and text[pos] != ';' and text[pos] != '}' and text[pos] != '{')
+		while (pos < text.size() and valueChar(text[pos]))
 		{
 			pos++;
 		}
@@ -474,10 +515,20 @@ private:
 
 	static bool wordChar(char c)
 	{
-		return (c >= 'a' and c <= 'z') or (c >= 'A' and c <= 'Z') or (c >= '0' and c <= '9') or c == '-' or c == '_';
+		return upperLetter(c) or lowerLetter(c) or digit(c) or c == '-' or c == '_';
 	}
 
-	static bool known(std::vector<std::string> const& list, std::string const& s)
+	static bool patternChar(char c)
+	{
+		return wordChar(c) or c == '*' or c == '~';
+	}
+
+	static bool valueChar(char c)
+	{
+		return not space(c) and c != ';' and c != '}' and c != '{';
+	}
+
+	static bool contains(std::vector<std::string> const& list, std::string const& s)
 	{
 		for (std::string const& item : list)
 		{
@@ -494,47 +545,6 @@ private:
 	std::string const& text;
 	std::size_t pos = 0;
 };
-
-bool validNodeType(std::string const& type)
-{
-	for (std::string const& t : g_Types)
-	{
-		if (t == type and t != "*")
-		{
-			return true;
-		}
-	}
-
-	return false;
-}
-
-static bool matchPart(Selector const& s, std::size_t part, Node const* node)
-{
-	if (not s.parts[part].matches(*node))
-	{
-		return false;
-	}
-
-	if (part == 0)
-	{
-		return true;
-	}
-
-	if (s.combinators[part - 1] == Combinator::CHILD)
-	{
-		return node->parent and matchPart(s, part - 1, node->parent);
-	}
-
-	for (Node const* a = node->parent; a; a = a->parent)
-	{
-		if (matchPart(s, part - 1, a))
-		{
-			return true;
-		}
-	}
-
-	return false;
-}
 
 bool Compound::matches(Node const& node) const
 {
@@ -609,10 +619,10 @@ Stylesheet::Stylesheet(std::filesystem::path const& file)
 
 	std::string text = ss.str();
 	StyleParser parser(file, text);
-	parsed = parser.parse();
+	list = parser.parse();
 }
 
 std::vector<Rule> const& Stylesheet::rules() const
 {
-	return parsed;
+	return list;
 }

@@ -23,26 +23,26 @@ std::vector<std::filesystem::path> gitChangedFiles()
 		throw std::runtime_error("git status failed: " + trim(status.error));
 	}
 
-	std::string const& out = status.output;
+	std::string const& text = status.output;
 	std::vector<std::filesystem::path> files;
 	std::size_t i = 0;
 
-	while (i < out.size())
+	while (i < text.size())
 	{
-		std::size_t end = out.find('\0', i);
+		std::size_t end = text.find('\0', i);
 
 		if (end == std::string::npos)
 		{
-			end = out.size();
+			end = text.size();
 		}
 
-		std::string entry = out.substr(i, end - i);
+		std::string entry = text.substr(i, end - i);
 		i = end + 1;
 
 		if (entry[0] == 'R' or entry[0] == 'C')
 		{
-			std::size_t next = out.find('\0', i);
-			i = next == std::string::npos ? out.size() : next + 1;
+			std::size_t next = text.find('\0', i);
+			i = next == std::string::npos ? text.size() : next + 1;
 		}
 
 		if (entry.size() < 4)

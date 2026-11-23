@@ -19,7 +19,7 @@ public:
 	int exitCode() const;
 
 private:
-	void report(std::filesystem::path const& file, std::vector<Diagnostic> const& ds, std::FILE* out);
+	void report(std::filesystem::path const& file, std::vector<Diagnostic> const& ds, std::FILE* fp);
 	void fail(std::filesystem::path const& file, std::string const& msg);
 	std::optional<std::string> base(std::filesystem::path const& file) const;
 

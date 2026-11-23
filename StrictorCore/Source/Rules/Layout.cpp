@@ -86,7 +86,7 @@ void convertOperator(SourceText const& src,
 		}
 		else if (spelling == "!")
 		{
-			bool spaced = offset + 1 < text.size() and (text[offset + 1] == ' ' or text[offset + 1] == '\t');
+			bool spaced = offset + 1 < text.size() and blank(text[offset + 1]);
 			e.text = spaced ? "not" : "not ";
 		}
 		else
@@ -110,7 +110,7 @@ void convertOperator(SourceText const& src,
 	{
 		e.text = "!";
 
-		while (offset + e.length < text.size() and (text[offset + e.length] == ' ' or text[offset + e.length] == '\t'))
+		while (offset + e.length < text.size() and blank(text[offset + e.length]))
 		{
 			e.length++;
 		}
@@ -133,7 +133,7 @@ void spaceNot(SourceText const& src, std::size_t offset, std::string const& spel
 		return;
 	}
 
-	if (text[next] == ' ' or text[next] == '\t' or text[next] == '\r' or text[next] == '\n')
+	if (blank(text[next]) or text[next] == '\r' or text[next] == '\n')
 	{
 		return;
 	}
@@ -167,7 +167,7 @@ void splitDeclarators(SourceText const& src,
 
 	std::size_t lineStart = src.lineStart(src.line(first.start));
 	std::string indent = text.substr(lineStart, skipBlanks(text, lineStart) - lineStart);
-	std::string result = text.substr(first.start, first.end - first.start);
+	std::string replacement = text.substr(first.start, first.end - first.start);
 
 	for (std::size_t i = 1; i < group.size(); i++)
 	{
@@ -179,10 +179,10 @@ void splitDeclarators(SourceText const& src,
 		}
 
 		std::string part = trim(text.substr(comma + 1, group[i].end - comma - 1));
-		result += ";" + src.eol() + indent + prefix + " " + part;
+		replacement += ";" + src.eol() + indent + prefix + " " + part;
 	}
 
-	edits->push_back({first.start, group.back().end - first.start, result});
+	edits->push_back({first.start, group.back().end - first.start, replacement});
 }
 
 void braceCases(SourceText const& src, std::vector<CaseBody> const& bodies, std::vector<Edit>* result)

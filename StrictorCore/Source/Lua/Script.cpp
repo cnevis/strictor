@@ -30,7 +30,7 @@ void RuleContext::report(std::string const& rule, SyntaxNode const& node, std::s
 	diagnostics->push_back({node.line, node.column, rule, msg});
 }
 
-void RuleContext::insertBefore(SyntaxNode const& node, std::string const& text)
+void RuleContext::prepend(SyntaxNode const& node, std::string const& text)
 {
 	edits->push_back({node.start, 0, text});
 }
@@ -92,7 +92,7 @@ Script::Script(std::filesystem::path const& file)
 	lua.new_usertype<RuleContext>("RuleContext",
 		sol::no_constructor,
 		"report", &RuleContext::report,
-		"insertBefore", &RuleContext::insertBefore);
+		"insertBefore", &RuleContext::prepend);
 
 	lua.set_function("on", [this](std::string const& type, sol::protected_function fn)
 	{
