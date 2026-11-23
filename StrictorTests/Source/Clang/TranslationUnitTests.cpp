@@ -198,17 +198,17 @@ TEST_CASE("TranslationUnit collects declarations with their node type and attrib
 		{"U", "type", {{"storage", "template"}}},
 		{"Small", "type", {}},
 		{"Widget", "type", {}},
-		{"paint", "function", {{"access", "public"}, {"scope", "member"}}},
-		{"width", "function", {{"access", "public"}, {"scope", "member"}}},
+		{"paint", "function", {{"lines", "single"}, {"access", "public"}, {"scope", "member"}}},
+		{"width", "function", {{"lines", "single"}, {"access", "public"}, {"scope", "member"}}},
 		{"other", "variable", {{"storage", "parameter"}, {"const", "none"}}},
 		{"s_Instances", "variable", {{"storage", "member"}, {"access", "public"}, {"const", "none"}}},
 		{"m_Height", "variable", {{"storage", "member"}, {"access", "protected"}, {"const", "none"}}},
 		{"m_Width", "variable", {{"storage", "member"}, {"access", "private"}, {"const", "none"}}},
-		{"layout", "function", {{"access", "private"}, {"scope", "member"}}},
+		{"layout", "function", {{"lines", "single"}, {"access", "private"}, {"scope", "member"}}},
 		{"Button", "type", {}},
 		{"calls", "variable", {{"storage", "local"}, {"const", "none"}}},
 		{"local", "variable", {{"storage", "local"}, {"const", "const"}}},
-		{"compute", "function", {{"scope", "free"}, {"linkage", "external"}, {"types", "plain"}, {"file", "class"}, {"callers", "none"}}},
+		{"compute", "function", {{"lines", "multi"}, {"scope", "free"}, {"linkage", "external"}, {"types", "plain"}, {"file", "class"}, {"callers", "none"}}},
 		{"value", "variable", {{"storage", "parameter"}, {"const", "none"}}},
 		{"twiceIt", "variable", {{"storage", "local"}, {"const", "none"}}},
 		{"v", "variable", {{"storage", "parameter"}, {"const", "none"}}}
@@ -455,17 +455,17 @@ TEST_CASE("TranslationUnit computes scope, linkage, types, callers and owner for
 
 	Expected const expected[] =
 	{
-		{"area", {{"access", "public"}, {"scope", "member"}}, ""},
-		{"size", {{"access", "public"}, {"scope", "member"}}, ""},
-		{"twiceInline", {{"access", "public"}, {"scope", "member"}}, ""},
-		{"run", {{"access", "public"}, {"scope", "member"}}, ""},
-		{"hidden", {{"scope", "free"}, {"linkage", "internal"}, {"types", "plain"}, {"file", "class"}, {"callers", "one-class"}}, "Widget"},
-		{"upper", {{"scope", "free"}, {"linkage", "internal"}, {"types", "plain"}, {"file", "class"}, {"callers", "one-class"}}, "Widget"},
-		{"shared", {{"scope", "free"}, {"linkage", "internal"}, {"types", "plain"}, {"file", "class"}, {"callers", "several"}}, "Widget"},
-		{"shift", {{"scope", "free"}, {"linkage", "internal"}, {"types", "project"}, {"file", "class"}, {"callers", "one-class"}}, "Widget"},
-		{"unused", {{"scope", "free"}, {"linkage", "external"}, {"types", "project"}, {"file", "class"}, {"callers", "none"}}, "Widget"},
-		{"recursive", {{"scope", "free"}, {"linkage", "external"}, {"types", "plain"}, {"file", "class"}, {"callers", "none"}}, "Widget"},
-		{"identity", {{"scope", "free"}, {"linkage", "external"}, {"types", "plain"}, {"file", "class"}, {"callers", "one-class"}}, "Widget"}
+		{"area", {{"lines", "single"}, {"access", "public"}, {"scope", "member"}}, ""},
+		{"size", {{"lines", "single"}, {"access", "public"}, {"scope", "member"}}, ""},
+		{"twiceInline", {{"lines", "single"}, {"access", "public"}, {"scope", "member"}}, ""},
+		{"run", {{"lines", "single"}, {"access", "public"}, {"scope", "member"}}, ""},
+		{"hidden", {{"lines", "single"}, {"scope", "free"}, {"linkage", "internal"}, {"types", "plain"}, {"file", "class"}, {"callers", "one-class"}}, "Widget"},
+		{"upper", {{"lines", "single"}, {"scope", "free"}, {"linkage", "internal"}, {"types", "plain"}, {"file", "class"}, {"callers", "one-class"}}, "Widget"},
+		{"shared", {{"lines", "single"}, {"scope", "free"}, {"linkage", "internal"}, {"types", "plain"}, {"file", "class"}, {"callers", "several"}}, "Widget"},
+		{"shift", {{"lines", "single"}, {"scope", "free"}, {"linkage", "internal"}, {"types", "project"}, {"file", "class"}, {"callers", "one-class"}}, "Widget"},
+		{"unused", {{"lines", "single"}, {"scope", "free"}, {"linkage", "external"}, {"types", "project"}, {"file", "class"}, {"callers", "none"}}, "Widget"},
+		{"recursive", {{"lines", "single"}, {"scope", "free"}, {"linkage", "external"}, {"types", "plain"}, {"file", "class"}, {"callers", "none"}}, "Widget"},
+		{"identity", {{"lines", "single"}, {"scope", "free"}, {"linkage", "external"}, {"types", "plain"}, {"file", "class"}, {"callers", "one-class"}}, "Widget"}
 	};
 
 	for (Expected const& e : expected)

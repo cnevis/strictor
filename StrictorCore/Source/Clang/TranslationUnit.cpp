@@ -725,6 +725,8 @@ private:
 
 	void function(SyntaxNode* n, CXCursor c)
 	{
+		n->node.attributes["lines"] = n->firstLine == n->lastLine ? "single" : "multi";
+
 		if (not member(c))
 		{
 			n->node.attributes["scope"] = "free";

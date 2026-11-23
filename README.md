@@ -90,13 +90,14 @@ Node types are `type`, `function`, `variable`, `enumerator`, `macro`, `namespace
 | `callers` | `none`, `one-class`, `several`                       |
 | `types`   | `plain`, `project`                                   |
 | `enum`    | `class`, `plain`                                     |
+| `lines`   | `single`, `multi` (functions)                        |
 
 | Property                                                             | Effect                                                                                                                       |
 | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | `name`                                                               | Allowed name styles: `PascalCase`, `camelCase`, `UPPER_SNAKE`, `snake_case`, optionally with a prefix such as `m_PascalCase` |
 | `rename`                                                             | `old=new` word replacements                                                                                                  |
 | `banned-names`, `banned-parts`, `banned-prefixes`, `banned-suffixes` | Words a name must not be or contain                                                                                          |
-| `blank-before`, `blank-after`                                        | Exact blank lines around a statement                                                                                         |
+| `blank-before`, `blank-after`                                        | Exact blank lines around a statement or declaration                                                                          |
 | `max-clauses`                                                        | Most `and`/`or` clauses in a condition                                                                                       |
 | `logical-operators`                                                  | `words` rewrites `&&`, `\|\|` and `!` to `and`, `or` and `not`                                                               |
 | `declarators`                                                        | `split` puts each declarator in its own declaration                                                                          |

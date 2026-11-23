@@ -102,6 +102,11 @@ control[braced=no]
 	blank-after: 0;
 }
 
+function[lines=multi]
+{
+	blank-after: 1;
+}
+
 control > condition
 {
 	max-clauses: 4;

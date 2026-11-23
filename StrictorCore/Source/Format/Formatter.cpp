@@ -76,6 +76,27 @@ static int number(Properties const& props, char const* key)
 	return it == props.end() ? -1 : std::stoi(it->second[0]);
 }
 
+static void spaceSiblings(std::vector<SyntaxNode*> const& siblings,
+                          Cascade const& cascade,
+                          SourceText const& src,
+                          std::vector<Edit>* edits)
+{
+	std::vector<Spacing> statements;
+
+	for (SyntaxNode const* n : siblings)
+	{
+		Properties props = cascade.compute(n->node);
+		Spacing s;
+		s.first = n->firstLine;
+		s.last = n->lastLine;
+		s.before = number(props, "blank-before");
+		s.after = number(props, "blank-after");
+		statements.push_back(s);
+	}
+
+	spaceStatements(src, statements, edits);
+}
+
 Formatter::Formatter(Toolchain const& tc, std::filesystem::path const& buildDir)
 	: clangFormat(tc.clangFormat())
 	, buildDir(buildDir)
@@ -212,22 +233,9 @@ void Formatter::check(std::filesystem::path const& file,
 			checkHelper(f, props, diagnostics);
 		}
 
-		if (n->node.type == "block")
+		if (n->node.type == "block" or n->node.type == "type" or n->node.type == "namespace")
 		{
-			std::vector<Spacing> statements;
-
-			for (SyntaxNode const* child : n->children)
-			{
-				Properties cp = cascade.compute(child->node);
-				Spacing s;
-				s.first = child->firstLine;
-				s.last = child->lastLine;
-				s.before = number(cp, "blank-before");
-				s.after = number(cp, "blank-after");
-				statements.push_back(s);
-			}
-
-			spaceStatements(src, statements, edits);
+			spaceSiblings(n->children, cascade, src, edits);
 		}
 
 		if (switchBlock(*n))
@@ -290,10 +298,16 @@ void Formatter::check(std::filesystem::path const& file,
 		}
 	}
 
+	std::vector<SyntaxNode*> tops;
 	std::map<std::pair<SyntaxNode const*, std::size_t>, std::vector<SyntaxNode const*>> groups;
 
 	for (std::unique_ptr<SyntaxNode> const& n : tree.nodes())
 	{
+		if (not n->parent)
+		{
+			tops.push_back(n.get());
+		}
+
 		if (n->node.type != "variable" or not groupable(*n))
 		{
 			continue;
@@ -308,6 +322,8 @@ void Formatter::check(std::filesystem::path const& file,
 
 		groups[key].push_back(n.get());
 	}
+
+	spaceSiblings(tops, cascade, src, edits);
 
 	for (auto const& [key, group] : groups)
 	{

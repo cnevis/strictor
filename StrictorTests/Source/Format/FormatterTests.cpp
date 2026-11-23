@@ -494,3 +494,68 @@ TEST_CASE("Formatter splits declarators, braces case bodies and reports plain en
 	CHECK(again.text == expected);
 	CHECK(lines(again.diagnostics) == found);
 }
+
+TEST_CASE("Formatter puts a blank line after multi-line functions in classes, namespaces and files")
+{
+	TempDir tmp;
+	tmp.write(".clang-format", "DisableFormat: true\n");
+	tmp.write(".strictor", "function[lines=multi] { blank-after: 1; }\n");
+
+	std::string code =
+		"struct Paint;\n"
+		"namespace impl\n"
+		"{\n"
+		"\tstruct Parser\n"
+		"\t{\n"
+		"\t\tstatic bool parseColor(\n"
+		"\t\t\tchar const* text,\n"
+		"\t\t\tPaint* result);\n"
+		"\t\tstatic bool parsePaint(\n"
+		"\t\t\tchar const* text,\n"
+		"\t\t\tPaint* result);\n"
+		"\t\tstatic bool parseUrl(char const* text);\n"
+		"\t\tstatic bool parseName(\n"
+		"\t\t\tchar const* text);\n"
+		"\t};\n"
+		"\tbool check(\n"
+		"\t\tint v);\n"
+		"\tbool other(int v);\n"
+		"} // namespace impl\n"
+		"int top(\n"
+		"\tint v);\n"
+		"int last(int v);\n";
+
+	Formatter f(toolchain(), {});
+	FormatResult r = f.format(tmp.path() / "a.h", code);
+
+	std::string expected =
+		"struct Paint;\n"
+		"namespace impl\n"
+		"{\n"
+		"\tstruct Parser\n"
+		"\t{\n"
+		"\t\tstatic bool parseColor(\n"
+		"\t\t\tchar const* text,\n"
+		"\t\t\tPaint* result);\n"
+		"\n"
+		"\t\tstatic bool parsePaint(\n"
+		"\t\t\tchar const* text,\n"
+		"\t\t\tPaint* result);\n"
+		"\n"
+		"\t\tstatic bool parseUrl(char const* text);\n"
+		"\t\tstatic bool parseName(\n"
+		"\t\t\tchar const* text);\n"
+		"\t};\n"
+		"\tbool check(\n"
+		"\t\tint v);\n"
+		"\n"
+		"\tbool other(int v);\n"
+		"} // namespace impl\n"
+		"int top(\n"
+		"\tint v);\n"
+		"\n"
+		"int last(int v);\n";
+
+	CHECK(r.text == expected);
+	CHECK(f.format(tmp.path() / "a.h", r.text).text == expected);
+}

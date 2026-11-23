@@ -33,7 +33,8 @@ static std::map<std::string, std::vector<std::string>> const g_Attributes =
 	{"file", {"class", "other"}},
 	{"callers", {"none", "one-class", "several"}},
 	{"types", {"plain", "project"}},
-	{"enum", {"class", "plain"}}
+	{"enum", {"class", "plain"}},
+	{"lines", {"single", "multi"}}
 };
 
 static bool number(std::string const& s, int least)
