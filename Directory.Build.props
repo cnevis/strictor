@@ -1,0 +1,20 @@
+<Project>
+	<PropertyGroup>
+		<Configuration Condition="'$(Configuration)'==''">Debug</Configuration>
+		<Platform Condition="'$(Platform)'==''">x64</Platform>
+		<SolutionRoot>$(MSBuildThisFileDirectory)</SolutionRoot>
+		<LLVMDir Condition="'$(LLVMDir)'==''">$(ProgramW6432)\LLVM</LLVMDir>
+		<VcpkgEnabled>false</VcpkgEnabled>
+		<VcpkgInstalled Condition="'$(VcpkgInstalled)'==''">D:\vcpkg\installed\x64-windows</VcpkgInstalled>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Platform)'=='x64'">
+		<OutDir>$(SolutionRoot)Build\MSBuild\$(Configuration)\Output\</OutDir>
+		<IntDir>$(SolutionRoot)Build\MSBuild\$(Configuration)\obj\$(MSBuildProjectName)\</IntDir>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Platform)'!='x64'">
+		<OutDir>$(SolutionRoot)Build\MSBuild\$(Platform)\$(Configuration)\Output\</OutDir>
+		<IntDir>$(SolutionRoot)Build\MSBuild\$(Platform)\$(Configuration)\obj\$(MSBuildProjectName)\</IntDir>
+	</PropertyGroup>
+</Project>

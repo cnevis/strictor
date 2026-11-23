@@ -1,0 +1,7 @@
+/.vs/
+/Build/
+*.user
+*.suo
+compile_commands.json
+/Playground/.vs
+/Issues.md

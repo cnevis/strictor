@@ -1,0 +1,24 @@
+<Project>
+	<PropertyGroup>
+		<VcpkgLuaDir Condition="'$(Configuration)'=='Debug'">$(VcpkgInstalled)\debug</VcpkgLuaDir>
+		<VcpkgLuaDir Condition="'$(Configuration)'!='Debug'">$(VcpkgInstalled)</VcpkgLuaDir>
+		<ExternalIncludePath>$(LLVMDir)\include;$(VcpkgInstalled)\include;$(ExternalIncludePath)</ExternalIncludePath>
+	</PropertyGroup>
+
+	<ItemDefinitionGroup>
+		<ClCompile>
+			<AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+			<AdditionalOptions>/utf-8 /bigobj %(AdditionalOptions)</AdditionalOptions>
+			<PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;NOMINMAX;SOL_PRINT_ERRORS=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+		</ClCompile>
+		<Link>
+			<AdditionalDependencies>$(LLVMDir)\lib\libclang.lib;$(VcpkgLuaDir)\lib\lua.lib;delayimp.lib;shell32.lib;ole32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+			<DelayLoadDLLs>libclang.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+		</Link>
+	</ItemDefinitionGroup>
+
+	<Target Name="CopyLuaRuntime" AfterTargets="Build" Condition="'$(ConfigurationType)'=='Application'">
+		<Copy SourceFiles="$(VcpkgLuaDir)\bin\lua.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+	</Target>
+</Project>

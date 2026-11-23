@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup Label="ProjectConfigurations">
+		<ProjectConfiguration Include="Debug|x64">
+			<Configuration>Debug</Configuration>
+			<Platform>x64</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="Release|x64">
+			<Configuration>Release</Configuration>
+			<Platform>x64</Platform>
+		</ProjectConfiguration>
+	</ItemGroup>
+
+	<PropertyGroup Label="Globals">
+		<VCProjectVersion>17.0</VCProjectVersion>
+		<ProjectGuid>{A2E0D89F-06ED-4F6A-9761-96136BC01BC2}</ProjectGuid>
+		<RootNamespace>StrictorTests</RootNamespace>
+		<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+	</PropertyGroup>
+
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+
+	<PropertyGroup Label="Configuration">
+		<ConfigurationType>Application</ConfigurationType>
+		<PlatformToolset>v145</PlatformToolset>
+		<CharacterSet>Unicode</CharacterSet>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)'=='Debug'" Label="Configuration">
+		<UseDebugLibraries>true</UseDebugLibraries>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)'=='Release'" Label="Configuration">
+		<UseDebugLibraries>false</UseDebugLibraries>
+	</PropertyGroup>
+
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+	<Import Project="..\StrictorCore\StrictorCore.props" />
+
+	<ItemDefinitionGroup>
+		<ClCompile>
+			<WarningLevel>Level4</WarningLevel>
+			<SDLCheck>true</SDLCheck>
+			<ConformanceMode>true</ConformanceMode>
+			<LanguageStandard>stdcpplatest</LanguageStandard>
+			<MultiProcessorCompilation>true</MultiProcessorCompilation>
+			<AdditionalIncludeDirectories>$(ProjectDir)Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+		</ClCompile>
+		<Link>
+			<SubSystem>Console</SubSystem>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+		</Link>
+	</ItemDefinitionGroup>
+
+	<ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
+		<ClCompile>
+			<PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+		</ClCompile>
+		<Link>
+			<AdditionalDependencies>$(VcpkgInstalled)\debug\lib\Catch2d.lib;$(VcpkgInstalled)\debug\lib\manual-link\Catch2Maind.lib;%(AdditionalDependencies)</AdditionalDependencies>
+		</Link>
+	</ItemDefinitionGroup>
+
+	<ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
+		<ClCompile>
+			<PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+		</ClCompile>
+		<Link>
+			<AdditionalDependencies>$(VcpkgInstalled)\lib\Catch2.lib;$(VcpkgInstalled)\lib\manual-link\Catch2Main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+		</Link>
+	</ItemDefinitionGroup>
+
+	<ItemGroup>
+		<ClCompile Include="Source\App\CommandLineTests.cpp" />
+		<ClCompile Include="Source\App\RequestTests.cpp" />
+		<ClCompile Include="Source\Clang\ClangFormatTests.cpp" />
+		<ClCompile Include="Source\Clang\CompileDatabaseTests.cpp" />
+		<ClCompile Include="Source\Clang\TranslationUnitTests.cpp" />
+		<ClCompile Include="Source\Format\FormatterTests.cpp" />
+		<ClCompile Include="Source\Format\LineDeltaTests.cpp" />
+		<ClCompile Include="Source\Lua\ScriptTests.cpp" />
+		<ClCompile Include="Source\Rules\DesignTests.cpp" />
+		<ClCompile Include="Source\Rules\LayoutTests.cpp" />
+		<ClCompile Include="Source\Rules\NameStyleTests.cpp" />
+		<ClCompile Include="Source\Rules\NamingTests.cpp" />
+		<ClCompile Include="Source\Style\CascadeTests.cpp" />
+		<ClCompile Include="Source\Style\StylesheetTests.cpp" />
+		<ClCompile Include="Source\Support\Fixtures.cpp" />
+		<ClCompile Include="Source\Support\TempDir.cpp" />
+		<ClCompile Include="Source\Support\WorkingDir.cpp" />
+		<ClCompile Include="Source\System\GitTests.cpp" />
+		<ClCompile Include="Source\System\ProcessTests.cpp" />
+		<ClCompile Include="Source\System\TextTests.cpp" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ClInclude Include="Source\Support\Fixtures.h" />
+		<ClInclude Include="Source\Support\TempDir.h" />
+		<ClInclude Include="Source\Support\WorkingDir.h" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\StrictorCore\StrictorCore.vcxproj">
+			<Project>{6BB2B8AD-3A64-45E5-8EC2-F12B6FB10395}</Project>
+		</ProjectReference>
+		<ProjectReference Include="..\strictor\strictor.vcxproj">
+			<Project>{D7EB2800-C9D3-4989-92F7-2E1A48C4CFEB}</Project>
+			<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+			<LinkLibraryDependencies>false</LinkLibraryDependencies>
+		</ProjectReference>
+	</ItemGroup>
+
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>
